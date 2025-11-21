@@ -5,16 +5,19 @@
 package frc.robot;
 
 import frc.robot.Constants.OperatorConstants;
-import frc.robot.commands.Autos;
 
 import frc.robot.subsystems.swerve.SwerveSubsystem;
 import swervelib.SwerveInputStream;
 
 import java.io.File;
+
+import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.util.Units;
+
 import edu.wpi.first.wpilibj.Filesystem;
 
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.button.CommandJoystick;
+import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 
 /**
@@ -29,11 +32,11 @@ public class RobotContainer {
   SwerveInputStream driveFieldAngularVelocityStream;
   SwerveInputStream driveRobotAngularVelocityStream;
 
-
+  int DebugMode = 0;
 
   // Replace with CommandPS4Controller or CommandJoystick if needed
-  private final CommandJoystick driverJoystick =
-      new CommandJoystick(OperatorConstants.kDriverControllerPort);
+  private final CommandXboxController driverJoystick =
+      new CommandXboxController(OperatorConstants.kDriverControllerPort);
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
@@ -59,9 +62,9 @@ public class RobotContainer {
   private void configureInputStreams() {
     driveFieldAngularVelocityStream = SwerveInputStream.of(
       swerveDrive.swerveDrive,
-      () -> driverJoystick.getY(),
-      () -> driverJoystick.getX()
-    ).withControllerRotationAxis(() -> driverJoystick.getTwist())
+      () -> driverJoystick.getLeftY(),
+      () -> (DebugMode == 0 ? driverJoystick.getLeftX() : 0.0)
+    ).withControllerRotationAxis(() -> DebugMode == 0 ? driverJoystick.getRightX() : 0.0)
      .deadband(Constants.OperatorConstants.deadband)
      .allianceRelativeControl(true);
 
@@ -77,6 +80,6 @@ public class RobotContainer {
    */
   public Command getAutonomousCommand() {
     // An example command will be run in autonomous
-    return Autos.exampleAuto(null);
+    return swerveDrive.changePosition(new Translation2d(0.0, 2.0), Units.feetToMeters(3.0));
   }
 }
